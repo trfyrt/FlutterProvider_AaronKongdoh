@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 import 'package:global_state/global_state.dart'; // Import package
 
@@ -26,32 +27,52 @@ class CounterApp extends StatelessWidget {
     final globalState = Provider.of<GlobalState>(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Global Counter App')),
+      appBar: AppBar(title: Text('Advanced Counter App')),
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
+            child: ReorderableListView.builder(
               itemCount: globalState.counters.length,
+              onReorder: globalState.reorderCounters,
               itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(
-                      'Counter ${index + 1}: ${globalState.counters[index]}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.remove),
-                        onPressed: () => globalState.decrementCounter(index),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.add),
-                        onPressed: () => globalState.incrementCounter(index),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => globalState.removeCounter(index),
-                      ),
-                    ],
+                final counter = globalState.counters[index];
+                return Card(
+                  key: ValueKey(counter),
+                  color: counter.color.withOpacity(0.2),
+                  child: ListTile(
+                    title: Text(
+                      '${counter.label}: ${counter.value}',
+                      style: TextStyle(color: counter.color),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.remove),
+                          onPressed: () => globalState.decrementCounter(index),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.add),
+                          onPressed: () => globalState.incrementCounter(index),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.color_lens),
+                          onPressed: () {
+                            _showColorPicker(context, globalState, index);
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            _showLabelDialog(context, globalState, index);
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => globalState.removeCounter(index),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -63,6 +84,58 @@ class CounterApp extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showColorPicker(
+      BuildContext context, GlobalState globalState, int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Select Counter Color'),
+          content: SingleChildScrollView(
+            child: BlockPicker(
+              pickerColor: globalState.counters[index].color,
+              onColorChanged: (color) {
+                globalState.updateCounterColor(index, color);
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showLabelDialog(
+      BuildContext context, GlobalState globalState, int index) {
+    final controller =
+        TextEditingController(text: globalState.counters[index].label);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Edit Counter Label'),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(labelText: 'Label'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                globalState.updateCounterLabel(index, controller.text);
+                Navigator.of(context).pop();
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
