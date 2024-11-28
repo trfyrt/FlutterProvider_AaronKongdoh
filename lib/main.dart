@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 void main() {
   // Uncomment the following line to run the StatefulWidget version:
-  runApp(MyStatelessApp());
-  // runApp(MyStatefulWidgetApp());
+  // runApp(MyStatelessApp());
+  runApp(MyStatefulWidgetApp());
 }
 
 class MyStatelessApp extends StatelessWidget {
@@ -51,6 +51,14 @@ class _MyStatefulWidgetAppState extends State<MyStatefulWidgetApp> {
     });
   }
 
+  void decrementCounter() {
+    setState(() {
+      if (counter > 0) {
+        counter--;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -65,6 +73,10 @@ class _MyStatefulWidgetAppState extends State<MyStatefulWidgetApp> {
               ElevatedButton(
                 onPressed: incrementCounter,
                 child: Text('Increment'),
+              ),
+              ElevatedButton(
+                onPressed: decrementCounter,
+                child: Text('Decrement'),
               ),
             ],
           ),
