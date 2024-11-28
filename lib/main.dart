@@ -1,86 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:global_state/global_state.dart'; // Import package
 
 void main() {
-  // Uncomment the following line to run the StatefulWidget version:
-  // runApp(MyStatelessApp());
-  runApp(MyStatefulWidgetApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => GlobalState(),
+      child: MyApp(),
+    ),
+  );
 }
 
-class MyStatelessApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text('Stateless Counter App')),
-        body: CounterWidget(),
-      ),
+      home: CounterApp(),
     );
   }
 }
 
-class CounterWidget extends StatelessWidget {
+class CounterApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text('Counter Value: 0'),
-          SizedBox(height: 10),
+    final globalState = Provider.of<GlobalState>(context);
+
+    return Scaffold(
+      appBar: AppBar(title: Text('Global Counter App')),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: globalState.counters.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(
+                      'Counter ${index + 1}: ${globalState.counters[index]}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.remove),
+                        onPressed: () => globalState.decrementCounter(index),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.add),
+                        onPressed: () => globalState.incrementCounter(index),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => globalState.removeCounter(index),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
           ElevatedButton(
-            onPressed: () {},
-            child: Text('Increment'),
+            onPressed: globalState.addCounter,
+            child: Text('Add Counter'),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class MyStatefulWidgetApp extends StatefulWidget {
-  @override
-  _MyStatefulWidgetAppState createState() => _MyStatefulWidgetAppState();
-}
-
-class _MyStatefulWidgetAppState extends State<MyStatefulWidgetApp> {
-  int counter = 0;
-
-  void incrementCounter() {
-    setState(() {
-      counter++;
-    });
-  }
-
-  void decrementCounter() {
-    setState(() {
-      if (counter > 0) {
-        counter--;
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text('Stateful Counter App')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text('Counter Value: $counter'),
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: incrementCounter,
-                child: Text('Increment'),
-              ),
-              ElevatedButton(
-                onPressed: decrementCounter,
-                child: Text('Decrement'),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
